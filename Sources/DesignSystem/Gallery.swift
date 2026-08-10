@@ -17,8 +17,7 @@ struct Gallery: View {
             VStack(alignment: .leading, spacing: Spacing.lg) {
 
                 section("色") {
-                    swatch("brandAccent", .brandAccent)
-                    swatch("brandAccentSubtle", .brandAccentSubtle)
+                    swatch("brandAccent(既定の主色)", .brandAccent)
                     swatch("surfaceElevated", .surfaceElevated)
                     swatch("surfaceBackground", .surfaceBackground)
                 }
@@ -47,6 +46,16 @@ struct Gallery: View {
                     Button("無効") {}.buttonStyle(.primary).disabled(true)
                 }
 
+                // アプリ側が .tint を指定した場合の見え方。スタイルは主色を .tint から
+                // 引いているので、この 1 行だけで配下すべての配色が変わる。
+                section("アプリ側で tint を変えた場合") {
+                    VStack(spacing: Spacing.xs) {
+                        Button("主要な操作") {}.buttonStyle(.primary)
+                        Button("副次的な操作") {}.buttonStyle(.secondary)
+                    }
+                    .tint(.orange)
+                }
+
                 section("カード") {
                     VStack(alignment: .leading, spacing: Spacing.xs) {
                         Text("カードの見出し").font(.itemTitle)
@@ -62,6 +71,7 @@ struct Gallery: View {
             .padding(.vertical, Spacing.lg)
         }
         .background(Color.surfaceBackground)
+        .tint(.brandAccent)
     }
 
     private func section<Content: View>(
@@ -91,7 +101,7 @@ struct Gallery: View {
     private func bar(_ name: String, _ value: CGFloat) -> some View {
         HStack(spacing: Spacing.xs) {
             Rectangle()
-                .fill(Color.brandAccent)
+                .fill(.tint)
                 .frame(width: value, height: 12)
             Text("\(name) — \(Int(value))pt").font(.caption)
         }

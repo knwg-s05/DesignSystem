@@ -21,8 +21,8 @@ import SwiftUI
 /// `CaseIterable` にしてあるのは、テストが照合する一覧を手で保守しないため。
 /// case を足せば `allCases` に自動で入るので、「色を追加したがテストに書き忘れた」が起きない。
 enum BrandColor: String, CaseIterable {
+    /// 既定の主色。アプリが `.tint(...)` を指定しないときに使う。
     case brandAccent
-    case brandAccentSubtle
 
     /// このパッケージのリソースバンドルから色を解決する。
     var color: Color {

@@ -17,11 +17,15 @@ public extension Color {
 
     // MARK: - ブランド固有(アセットカタログ)
 
-    /// 操作可能なもの、選択中のものを示す主色。
+    /// このデザインシステムの既定の主色。
+    ///
+    /// **画面の中で直接使わない。** ボタンなどのスタイルは `.tint` を通して主色を引いており、
+    /// アプリが `.tint(...)` を指定すればそちらが優先される。この値は、アプリ側で
+    /// 何も指定しないときの既定として、ルートで `.tint(.brandAccent)` と書くために公開している。
+    ///
+    /// 画面の中で `Color.brandAccent` を直に書くと、アプリごとに配色を変えたときに
+    /// そこだけ取り残される。主色が欲しい場所では `.tint` を使う。
     static var brandAccent: Color { BrandColor.brandAccent.color }
-
-    /// 主色を薄く敷いた面。選択行の背景やタグの地に使う。
-    static var brandAccentSubtle: Color { BrandColor.brandAccentSubtle.color }
 
     // MARK: - OS から借りる色
 
@@ -65,7 +69,6 @@ public extension Color {
 /// 呼び出し側が毎回 `Color.` を書くことになる。
 public extension ShapeStyle where Self == Color {
     static var brandAccent: Color { .brandAccent }
-    static var brandAccentSubtle: Color { .brandAccentSubtle }
     static var surfaceBackground: Color { .surfaceBackground }
     static var surfaceElevated: Color { .surfaceElevated }
     static var contentPrimary: Color { .contentPrimary }

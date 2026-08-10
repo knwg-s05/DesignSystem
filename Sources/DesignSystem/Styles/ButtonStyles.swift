@@ -12,6 +12,13 @@ import SwiftUI
 /// `ButtonStyle` は見た目だけを差し替える口として用意されているので、挙動は `Button` の
 /// ものがそのまま残る。利用側も `Button("保存") { ... }.buttonStyle(.primary)` と書けて、
 /// 標準の書き方から外れない。
+///
+/// ## 色を固定しない
+///
+/// 主色は `Color.brandAccent` を直接使わず `.tint` で引いている。`.tint` は SwiftUI が
+/// 環境として持っている色で、アプリ側が `.tint(Color.parkGreen)` と書けばその配下すべてへ
+/// 伝わる。アプリごとに配色を変える仕組みを自作しなくても、標準の口がそのまま使える。
+/// アプリが何も指定しなければ、そのアプリの AccentColor が使われる。
 public struct PrimaryButtonStyle: ButtonStyle {
 
     /// 押されているかどうかは `configuration` から来るが、無効かどうかは環境から取る。
@@ -27,7 +34,7 @@ public struct PrimaryButtonStyle: ButtonStyle {
             .frame(maxWidth: .infinity)
             .padding(.vertical, Spacing.sm)
             .padding(.horizontal, Spacing.md)
-            .background(Color.brandAccent, in: .rect(cornerRadius: Radius.sm))
+            .background(.tint, in: .rect(cornerRadius: Radius.sm))
             .opacity(isEnabled ? 1 : 0.4)
             // 押下の表現は縮小と減光の両方を弱くかける。片方だけだと、色の薄い端末設定や
             // 動きを減らす設定のもとで反応が伝わらないことがある。
@@ -46,11 +53,13 @@ public struct SecondaryButtonStyle: ButtonStyle {
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.actionLabel)
-            .foregroundStyle(.brandAccent)
+            .foregroundStyle(.tint)
             .frame(maxWidth: .infinity)
             .padding(.vertical, Spacing.sm)
             .padding(.horizontal, Spacing.md)
-            .background(Color.brandAccentSubtle, in: .rect(cornerRadius: Radius.sm))
+            // 薄い面も主色から導く。専用の色を持たせると、アプリが tint を変えたときに
+            // 文字色と背景色の系統がずれる。
+            .background(.tint.opacity(0.15), in: .rect(cornerRadius: Radius.sm))
             .opacity(isEnabled ? 1 : 0.4)
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
