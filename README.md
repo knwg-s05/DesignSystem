@@ -107,16 +107,32 @@ iOS 26 で標準コントロールの見た目が刷新されたため、ここ�
 キャンバスに全トークンとスタイルの一覧が出る。ライトとダークのプレビューを分けてあるので、
 両方を並べて確認できる。色や余白を変えるとその場で反映される。
 
+Xcode で開くときは注意が要る。**Swift パッケージは複数のワークスペースで同時に開けない。**
+このパッケージを取り込んでいるアプリ(AnimalGarden など)を開いていると、`Package.swift` を
+単独で開こうとしても「already open in another workspace」で弾かれる。取り込み済みのアプリが
+あるなら、そちらのワークスペースの Package Dependencies から `Gallery.swift` を開く。
+
+**画像として書き出す** — `./Scripts/gallery.sh` を実行する。iOS シミュレータ上で
+`GalleryContent` を実際に描画し、ライトとダークの PNG を `.build/gallery/` に出す。
+Xcode を開かずに見たいとき、他人へ渡したいときに使う。
+
+```
+./Scripts/gallery.sh                        # iPhone 17 Pro で描く
+SIMULATOR='iPhone 17e' ./Scripts/gallery.sh # 端末を変える
+```
+
+画像はコミットしない。実装から描いているので、必要なときに出し直せば必ず最新になる。
+
 **API と設計意図** — `./Scripts/docs.sh` を実行する。ソース中の doc コメントから DocC の
 ドキュメントを生成し、Xcode のドキュメントビューアで開く。何が公開されていて、なぜその形に
-したかが階層で辿れる。
+したかが階層で辿れる。画像は出ない。
 
 ```
 ./Scripts/docs.sh           # Xcode のビューアで開く
 ./Scripts/docs.sh --serve   # ブラウザで見る(http://localhost:8000/documentation/designsystem)
 ```
 
-どちらも生成物は `.build/` 配下に出るので、リポジトリには入らない。
+いずれも生成物は `.build/` 配下に出るので、リポジトリには入らない。
 DocC のために依存を足す必要はなく、Xcode に同梱の機能だけで生成できる。
 
 ## テスト
