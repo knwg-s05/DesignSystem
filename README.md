@@ -6,8 +6,11 @@ ParkApp / BalloonPop / AnimalGarden から参照する、表示の語彙をま�
 ## 使う
 
 アプリ側で Xcode の File → Add Package Dependencies を開き、このリポジトリの URL を入れる。
-プライベートリポジトリなので、事前に Xcode の Settings → Accounts へ GitHub アカウントを
-登録しておく。
+公開リポジトリなので認証は要らない。
+
+参照する 3 アプリは非公開のまま。このリポジトリを公開しているのは、アプリ側の CI が
+チェックアウトするときに資格情報を要らなくするため。ここには色・余白・書体・スタイルの
+定義しか置かないので、公開しても各アプリの内容は出ない。
 
 ```swift
 import DesignSystem
