@@ -9,8 +9,16 @@ set -eu
 
 cd "$(dirname "$0")/.."
 
-OUT=$PWD/.build/gallery
+OUT=${GALLERY_OUT:-$PWD/.build/gallery}
 SIMULATOR=${SIMULATOR:-iPhone 17 Pro}
+
+# 端末名だけでは、同じ名前が複数のランタイムに存在する環境で解決できないことがある。
+# `xcrun simctl list devices available` の UDID を SIMULATOR_ID に渡すと確実に指定できる。
+if [ -n "${SIMULATOR_ID:-}" ]; then
+    DESTINATION="platform=iOS Simulator,id=$SIMULATOR_ID"
+else
+    DESTINATION="platform=iOS Simulator,name=$SIMULATOR"
+fi
 
 rm -rf "$OUT"
 
@@ -19,7 +27,7 @@ rm -rf "$OUT"
 TEST_RUNNER_GALLERY_EXPORT_PATH=$OUT \
 xcodebuild test \
     -scheme DesignSystem \
-    -destination "platform=iOS Simulator,name=$SIMULATOR" \
+    -destination "$DESTINATION" \
     -only-testing:DesignSystemTests/GalleryExportTests \
     -derivedDataPath .build/gallery-build \
     >/dev/null
