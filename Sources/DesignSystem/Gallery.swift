@@ -30,13 +30,28 @@ struct Gallery: View {
 /// プレビューでは通常どおりスクロールする形になる。
 struct GalleryContent: View {
 
+    @Environment(\.brandTint) private var brandTint
+
+    /// 主色を差し替えたときの見え方を確かめるための一覧。
+    /// 明るい色を含めているのは、文字色が自動で黒へ切り替わることを確認するため。
+    private let tintVariations: [(String, Color)] = [
+        ("brandAccent(既定)", .brandAccent),
+        ("orange", .orange),
+        ("yellow", .yellow),
+        ("green", .green),
+        ("pink", .pink),
+    ]
+
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.lg) {
 
             section("色") {
                 swatch("brandAccent(既定の主色)", .brandAccent)
-                swatch("surfaceElevated", .surfaceElevated)
                 swatch("surfaceBackground", .surfaceBackground)
+                swatch("surfaceElevated", .surfaceElevated)
+                swatch("fill", .fill)
+                swatch("fillSubtle", .fillSubtle)
+                swatch("separator", .separator)
             }
 
             section("書体") {
@@ -46,6 +61,8 @@ struct GalleryContent: View {
                 Text("本文 body").font(.body)
                 Text("caption 補足").font(.caption)
                     .foregroundStyle(.contentSecondary)
+                Text("caption 3 段目").font(.caption)
+                    .foregroundStyle(.contentTertiary)
             }
 
             section("余白") {
@@ -63,14 +80,21 @@ struct GalleryContent: View {
                 Button("無効") {}.buttonStyle(.primary).disabled(true)
             }
 
-            // アプリ側が .tint を指定した場合の見え方。スタイルは主色を .tint から
-            // 引いているので、この 1 行だけで配下すべての配色が変わる。
-            section("アプリ側で tint を変えた場合") {
-                VStack(spacing: Spacing.xs) {
-                    Button("主要な操作") {}.buttonStyle(.primary)
-                    Button("副次的な操作") {}.buttonStyle(.secondary)
+            // アプリ側が主色を変えた場合の見え方。スタイルは主色を環境から引いているので、
+            // .brandTint(_:) を 1 行書くだけで配下すべての配色が変わる。
+            //
+            // 明るい色(yellow、green)で文字が黒へ切り替わることがここで確認できる。
+            // 白のまま固定していると、この 2 行が読めなくなる。
+            section("主色を変えた場合") {
+                ForEach(tintVariations, id: \.0) { name, color in
+                    HStack(spacing: Spacing.xs) {
+                        Text(name)
+                            .font(.caption)
+                            .frame(width: 120, alignment: .leading)
+                        Button("主要な操作") {}.buttonStyle(.primary)
+                    }
+                    .brandTint(color)
                 }
-                .tint(.orange)
             }
 
             section("カード") {
@@ -87,7 +111,7 @@ struct GalleryContent: View {
         .screenPadding()
         .padding(.vertical, Spacing.lg)
         .background(Color.surfaceBackground)
-        .tint(.brandAccent)
+        .brandTint(.brandAccent)
     }
 
     private func section<Content: View>(
@@ -117,7 +141,7 @@ struct GalleryContent: View {
     private func bar(_ name: String, _ value: CGFloat) -> some View {
         HStack(spacing: Spacing.xs) {
             Rectangle()
-                .fill(.tint)
+                .fill(brandTint)
                 .frame(width: value, height: 12)
             Text("\(name) — \(Int(value))pt").font(.caption)
         }

@@ -15,26 +15,38 @@ import SwiftUI
 ///
 /// ## 色を固定しない
 ///
-/// 主色は `Color.brandAccent` を直接使わず `.tint` で引いている。`.tint` は SwiftUI が
-/// 環境として持っている色で、アプリ側が `.tint(Color.parkGreen)` と書けばその配下すべてへ
-/// 伝わる。アプリごとに配色を変える仕組みを自作しなくても、標準の口がそのまま使える。
-/// アプリが何も指定しなければ、そのアプリの AccentColor が使われる。
+/// 主色は `Color.brandAccent` を直接使わず、環境から引いている。アプリ側が
+/// `.brandTint(Color.parkGreen)` と書けばその配下すべてへ伝わる。
+///
+/// ## 文字色を白で固定しない
+///
+/// 塗りが主色で、その上に文字を置く。主色は明るい色にもなりうるので、白固定では
+/// 読めなくなる場合がある(黄や薄い緑を渡されたときが該当する)。塗りの明るさから
+/// 白か黒かを決める。判定は `Color.contrastingLabel(in:)` にある。
+///
+/// アプリがどの色を選んでも文字が読めることは、配色をアプリに委ねている以上、
+/// こちらの責任として扱う。規約で「明るい色を渡さない」と書く形にはしない。
 public struct PrimaryButtonStyle: ButtonStyle {
 
     /// 押されているかどうかは `configuration` から来るが、無効かどうかは環境から取る。
     /// `ButtonStyle` の `configuration` には有効・無効が含まれていないため。
     @Environment(\.isEnabled) private var isEnabled
 
+    @Environment(\.brandTint) private var brandTint
+
+    /// 色の解決には環境一式が要る(ダークモードやコントラスト設定で値が変わるため)。
+    @Environment(\.self) private var environment
+
     public init() {}
 
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.actionLabel)
-            .foregroundStyle(.white)
+            .foregroundStyle(brandTint.contrastingLabel(in: environment))
             .frame(maxWidth: .infinity)
             .padding(.vertical, Spacing.sm)
             .padding(.horizontal, Spacing.md)
-            .background(.tint, in: .rect(cornerRadius: Radius.sm))
+            .background(brandTint, in: .rect(cornerRadius: Radius.sm))
             .opacity(isEnabled ? 1 : 0.4)
             // 押下の表現は縮小と減光の両方を弱くかける。片方だけだと、色の薄い端末設定や
             // 動きを減らす設定のもとで反応が伝わらないことがある。
@@ -48,18 +60,21 @@ public struct SecondaryButtonStyle: ButtonStyle {
 
     @Environment(\.isEnabled) private var isEnabled
 
+    @Environment(\.brandTint) private var brandTint
+
     public init() {}
 
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.actionLabel)
-            .foregroundStyle(.tint)
+            .foregroundStyle(brandTint)
             .frame(maxWidth: .infinity)
             .padding(.vertical, Spacing.sm)
             .padding(.horizontal, Spacing.md)
-            // 薄い面も主色から導く。専用の色を持たせると、アプリが tint を変えたときに
+            // 薄い面も主色から導く。専用の色を持たせると、アプリが主色を変えたときに
             // 文字色と背景色の系統がずれる。
-            .background(.tint.opacity(0.15), in: .rect(cornerRadius: Radius.sm))
+            // ここは文字も主色なので、明るい主色でも文字と面の関係は保たれる。
+            .background(brandTint.opacity(0.15), in: .rect(cornerRadius: Radius.sm))
             .opacity(isEnabled ? 1 : 0.4)
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
