@@ -41,7 +41,7 @@ public struct HUDPanelModifier: ViewModifier {
             .background(Color.surfaceElevated.opacity(0.92), in: .rect(cornerRadius: Radius.md))
             .overlay {
                 RoundedRectangle(cornerRadius: Radius.md)
-                    .stroke(Color.contentPrimary.opacity(0.16), lineWidth: 1)
+                    .stroke(Color.contentPrimary.opacity(0.2), lineWidth: 1)
             }
     }
 }
@@ -52,19 +52,27 @@ public struct HUDPanelModifier: ViewModifier {
 /// 詳細説明やアプリ固有の意味は持たせず、表示の密度だけを揃える。
 public struct StatusBadgeModifier: ViewModifier {
 
-    private let tint: Color
+    @Environment(\.brandTint) private var brandTint
 
-    public init(tint: Color = .brandAccent) {
+    private let tint: Color?
+
+    public init(tint: Color? = nil) {
         self.tint = tint
     }
 
     public func body(content: Content) -> some View {
+        let resolvedTint = tint ?? brandTint
+
         content
             .font(.caption)
-            .foregroundStyle(tint)
+            .foregroundStyle(.contentPrimary)
             .padding(.vertical, Spacing.xxs)
             .padding(.horizontal, Spacing.xs)
-            .background(tint.opacity(0.14), in: .rect(cornerRadius: Radius.xs))
+            .background(resolvedTint.opacity(0.16), in: .rect(cornerRadius: Radius.xs))
+            .overlay {
+                RoundedRectangle(cornerRadius: Radius.xs)
+                    .stroke(resolvedTint.opacity(0.32), lineWidth: 1)
+            }
     }
 }
 
@@ -80,7 +88,7 @@ public extension View {
     }
 
     /// 短い状態ラベルとして表示する。
-    func statusBadge(tint: Color = .brandAccent) -> some View {
+    func statusBadge(tint: Color? = nil) -> some View {
         modifier(StatusBadgeModifier(tint: tint))
     }
 }
