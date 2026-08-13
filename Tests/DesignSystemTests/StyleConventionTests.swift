@@ -24,6 +24,16 @@ struct StyleConventionTests {
         #expect(source.contains(".stroke(Color.contentPrimary.opacity(0.16), lineWidth: 1)") == false)
     }
 
+    @Test("secondary buttonは文字色にbrandTintを使わない")
+    func secondaryButtonUsesReadableTextColor() throws {
+        let source = try Self.source(named: "ButtonStyles.swift")
+        let secondaryStyle = try #require(Self.declaration(named: "SecondaryButtonStyle", in: source))
+
+        #expect(secondaryStyle.contains(".foregroundStyle(.contentPrimary)"))
+        #expect(secondaryStyle.contains(".foregroundStyle(brandTint)") == false)
+        #expect(secondaryStyle.contains(".background(brandTint.opacity(0.15), in: .rect(cornerRadius: Radius.sm))"))
+    }
+
     private static func source(named fileName: String) throws -> String {
         let packageRoot = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
@@ -34,5 +44,18 @@ struct StyleConventionTests {
             .appending(path: fileName)
 
         return try String(contentsOf: sourceURL, encoding: .utf8)
+    }
+
+    private static func declaration(named typeName: String, in source: String) -> String? {
+        guard let start = source.range(of: "public struct \(typeName):")?.lowerBound else {
+            return nil
+        }
+
+        let remainder = source[start...]
+        guard let nextExtension = remainder.range(of: "\npublic extension")?.lowerBound else {
+            return String(remainder)
+        }
+
+        return String(remainder[..<nextExtension])
     }
 }
