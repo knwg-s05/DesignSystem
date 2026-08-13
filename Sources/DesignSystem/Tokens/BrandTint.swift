@@ -47,12 +47,14 @@ extension Color {
     func contrastingLabel(in environment: EnvironmentValues) -> Color {
         let resolved = resolve(in: environment)
 
-        let luminance = 0.2126 * Double(resolved.linearRed)
-            + 0.7152 * Double(resolved.linearGreen)
-            + 0.0722 * Double(resolved.linearBlue)
+        let luminance = RelativeLuminance(
+            linearRed: Double(resolved.linearRed),
+            linearGreen: Double(resolved.linearGreen),
+            linearBlue: Double(resolved.linearBlue)
+        )
 
-        let againstWhite = (1.0 + 0.05) / (luminance + 0.05)
-        let againstBlack = (luminance + 0.05) / 0.05
+        let againstWhite = luminance.contrastRatio(against: .white)
+        let againstBlack = luminance.contrastRatio(against: .black)
 
         return againstWhite >= againstBlack ? .white : .black
     }

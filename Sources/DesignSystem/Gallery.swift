@@ -107,11 +107,99 @@ struct GalleryContent: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .card()
             }
+
+            section("パネルとバッジ") {
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    Text("前面に重ねる読み物").font(.itemTitle)
+                    Text("背後の画面を残したまま、会話や設定を読ませる。")
+                        .font(.body)
+                    HStack(spacing: Spacing.xs) {
+                        Text("保存済み").statusBadge()
+                        Text("注意").statusBadge(tint: .orange)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .overlayPanel()
+
+                HStack(spacing: Spacing.xs) {
+                    Text("目的: 手掛かりを探す").font(.caption)
+                    Text("ヒントあり").statusBadge()
+                }
+                .hudPanel()
+            }
+
+            section("体験別の密度") {
+                readingScenario
+                hudScenario
+                smallLandscapeScenario
+            }
         }
         .screenPadding()
         .padding(.vertical, Spacing.lg)
         .background(Color.surfaceBackground)
         .brandTint(.brandAccent)
+    }
+
+    private var readingScenario: some View {
+        VStack(alignment: .leading, spacing: Spacing.xs) {
+            Text("読み物オーバーレイ").font(.itemTitle)
+            Text("短い履歴を残しながら、現在の本文を読む。")
+                .font(.caption)
+                .foregroundStyle(.contentSecondary)
+            Text("前の行は弱く、現在の行は本文として出す。")
+                .font(.body)
+            HStack {
+                Button("全文表示") {}.buttonStyle(.secondary)
+                Button("次へ") {}.buttonStyle(.primary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .overlayPanel()
+    }
+
+    private var hudScenario: some View {
+        ZStack(alignment: .topLeading) {
+            LinearGradient(
+                colors: [.green.opacity(0.35), .blue.opacity(0.18)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .frame(height: 132)
+            .clipShape(.rect(cornerRadius: Radius.lg))
+
+            VStack(alignment: .leading, spacing: Spacing.xxs) {
+                Text("MVP-00").font(.caption)
+                Text("Core save format v1")
+                    .font(.caption)
+                    .foregroundStyle(.contentSecondary)
+            }
+            .hudPanel()
+            .padding(Spacing.xs)
+        }
+    }
+
+    private var smallLandscapeScenario: some View {
+        ZStack(alignment: .bottom) {
+            LinearGradient(
+                colors: [.black.opacity(0.82), .blue.opacity(0.28)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .frame(height: 172)
+            .clipShape(.rect(cornerRadius: Radius.lg))
+
+            VStack(alignment: .leading, spacing: Spacing.xs) {
+                HStack {
+                    Text("小画面横向き").font(.itemTitle)
+                    Spacer()
+                    Text("Auto").statusBadge()
+                }
+                Text("横向きの狭い高さでも、本文と主要操作が押せる密度に収まるかを見る。")
+                    .font(.caption)
+            }
+            .overlayPanel(padding: Spacing.sm)
+            .padding(Spacing.xs)
+        }
     }
 
     private func section<Content: View>(
