@@ -67,13 +67,12 @@ public struct SecondaryButtonStyle: ButtonStyle {
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.actionLabel)
-            .foregroundStyle(brandTint)
+            .foregroundStyle(.contentPrimary)
             .frame(maxWidth: .infinity)
             .padding(.vertical, Spacing.sm)
             .padding(.horizontal, Spacing.md)
-            // 薄い面も主色から導く。専用の色を持たせると、アプリが主色を変えたときに
-            // 文字色と背景色の系統がずれる。
-            // ここは文字も主色なので、明るい主色でも文字と面の関係は保たれる。
+            // 主色は面へだけ使う。文字まで主色にすると、明るい主色で薄い面との
+            // コントラストが足りなくなる。
             .background(brandTint.opacity(0.15), in: .rect(cornerRadius: Radius.sm))
             .opacity(isEnabled ? 1 : 0.4)
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
