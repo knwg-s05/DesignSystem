@@ -41,7 +41,7 @@ public struct PrimaryButtonStyle: ButtonStyle {
 
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.actionLabel)
+            .brandFont(.actionLabel)
             .foregroundStyle(brandTint.contrastingLabel(in: environment))
             .frame(maxWidth: .infinity)
             .padding(.vertical, Spacing.sm)
@@ -66,7 +66,7 @@ public struct SecondaryButtonStyle: ButtonStyle {
 
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.actionLabel)
+            .brandFont(.actionLabel)
             .foregroundStyle(.contentPrimary)
             .frame(maxWidth: .infinity)
             .padding(.vertical, Spacing.sm)

@@ -98,6 +98,28 @@ ContentView()
     .brandTint(Color("AppTheme"))   // アプリ固有の色
 ```
 
+## アプリごとに書体を変える
+
+主色と同じ形で、アプリ側から渡す。渡さなければ OS のテキストスタイルのままで、見た目は変わらない。
+
+```swift
+ContentView()
+    .brandTypeface("HiraMaruProN-W4")   // アプリが選んだ書体
+```
+
+スタイルの中では `.font(.actionLabel)` ではなく **`.brandFont(.actionLabel)`** を使う。
+前者は環境を見ないため、アプリが渡した書体が効かない。役割は `TypeRole` にあり、
+`Font` の静的メンバと 1 対 1 で対応する。
+
+**書体の実体をここへ置かない。**どの書体を選ぶかはアプリの性格そのもので、どのアプリでも
+意味が変わらないものではない。主色と同じ理由で、受け取る口だけを持つ。
+
+⚠️ `Font.custom(_:size:)` は Dynamic Type を殺す。`TypeRole.font(typeface:)` は
+`relativeTo:` を伴う形で組み立てている。ここを崩さないこと (試験がある)。
+
+⚠️ SwiftUI の `design: .rounded` は英数字にしか効かず、かなは角ゴのままになる。
+丸ゴシックを日本語で使うなら書体名で指定する。OS 同梱の書体は登録が要らない。
+
 **`.tint(_:)` ではなく `.brandTint(_:)` を使う。** `.brandTint(_:)` は内部で `.tint(_:)` も
 適用するので、`Toggle` や `Picker` などの標準コントロールも同じ色に揃う。
 
