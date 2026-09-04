@@ -30,7 +30,7 @@ public enum TypeRole: CaseIterable, Sendable {
     public var systemFont: Font {
         let m = metrics
         let base = Font.system(m.textStyle)
-        return m.weight.map { base.weight($0) } ?? base
+        return m.systemWeight.map { base.weight($0) } ?? base
     }
 
     /// 役割の見え方。**`Typography.swift` の静的メンバも、名前付き書体の組み立ても、
@@ -38,16 +38,24 @@ public enum TypeRole: CaseIterable, Sendable {
     ///
     /// - `size`: そのテキストスタイルの既定の大きさ。名前付き書体を組むときの基準
     /// - `textStyle`: Dynamic Type の追随先
-    /// - `weight`: 太さ。`nil` はテキストスタイルの既定のまま
-    ///   (`headline` は既定で太いので、重ねて指定すると別の値になる)
-    var metrics: (size: CGFloat, textStyle: Font.TextStyle, weight: Font.Weight?) {
+    /// - `systemWeight`: OS のテキストスタイルへ重ねる太さ。**`nil` は「重ねない」。**
+    /// - `customWeight`: 名前付き書体へ与える太さ。**`nil` はその書体の既定のまま。**
+    ///
+    /// ⚠️ **2 つの太さが違う役割がある。**`headline` は**テキストスタイル自体が太い**ので、
+    /// OS 側へ `.semibold` を重ねると別の値になってしまう (`systemWeight` は `nil`)。
+    /// 一方 `relativeTo:` は Dynamic Type の追随先を指すだけで**太さを継がない**ため、
+    /// 名前付き書体には明示しないと見出しが細くなる (`customWeight` は `.semibold`)。
+    /// `body` と `caption` の `nil` は理由が別で、**既定の値をそのまま保つため**
+    /// (`.weight(.regular)` を重ねると `Font` の値としては別物になる)。
+    var metrics: (size: CGFloat, textStyle: Font.TextStyle,
+                  systemWeight: Font.Weight?, customWeight: Font.Weight?) {
         switch self {
-        case .screenTitle: return (34, .largeTitle, .bold)
-        case .sectionTitle: return (20, .title3, .semibold)
-        case .itemTitle: return (17, .headline, nil)
-        case .body: return (17, .body, nil)
-        case .caption: return (13, .footnote, nil)
-        case .actionLabel: return (17, .body, .semibold)
+        case .screenTitle: return (34, .largeTitle, .bold, .bold)
+        case .sectionTitle: return (20, .title3, .semibold, .semibold)
+        case .itemTitle: return (17, .headline, nil, .semibold)
+        case .body: return (17, .body, nil, nil)
+        case .caption: return (13, .footnote, nil, nil)
+        case .actionLabel: return (17, .body, .semibold, .semibold)
         }
     }
 
@@ -59,7 +67,7 @@ public enum TypeRole: CaseIterable, Sendable {
         guard let typeface, !typeface.isEmpty else { return systemFont }
         let m = metrics
         let font = Font.custom(typeface, size: m.size, relativeTo: m.textStyle)
-        return m.weight.map { font.weight($0) } ?? font
+        return m.customWeight.map { font.weight($0) } ?? font
     }
 }
 

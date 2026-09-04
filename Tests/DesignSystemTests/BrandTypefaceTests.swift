@@ -29,15 +29,16 @@ struct BrandTypefaceTests {
     @Test("名前付き書体の基準は役割ごとに決まっている")
     func metricsAreFixed() {
         // 名前付き書体は `metrics` から組む。**値が動いたら落ちるように直接書く。**
-        // ⚠️ `weight` の `nil` は「テキストスタイルの既定のまま」。`headline` は既定で太いため、
-        // `.semibold` を重ねると別の値になる (`公開している font の値が変わっていない` が捕まえる)。
-        let expected: [TypeRole: (CGFloat, Font.TextStyle, Font.Weight?)] = [
-            .screenTitle: (34, .largeTitle, .bold),
-            .sectionTitle: (20, .title3, .semibold),
-            .itemTitle: (17, .headline, nil),
-            .body: (17, .body, nil),
-            .caption: (13, .footnote, nil),
-            .actionLabel: (17, .body, .semibold),
+        // ⚠️ **太さが 2 つあるのは意図。**OS 側は `headline` のようにテキストスタイル自体が
+        // 太いものへ重ねると値が変わるため `nil`。名前付き書体側は `relativeTo:` が
+        // 太さを継がないため明示する。この差を潰すと、どちらかの見え方が壊れる。
+        let expected: [TypeRole: (CGFloat, Font.TextStyle, Font.Weight?, Font.Weight?)] = [
+            .screenTitle: (34, .largeTitle, .bold, .bold),
+            .sectionTitle: (20, .title3, .semibold, .semibold),
+            .itemTitle: (17, .headline, nil, .semibold),
+            .body: (17, .body, nil, nil),
+            .caption: (13, .footnote, nil, nil),
+            .actionLabel: (17, .body, .semibold, .semibold),
         ]
 
         // 役割を足したら、ここへも足す
@@ -51,8 +52,21 @@ struct BrandTypefaceTests {
             let got = role.metrics
             #expect(got.size == want.0, "\(role) の大きさ")
             #expect(got.textStyle == want.1, "\(role) の追随先")
-            #expect(got.weight == want.2, "\(role) の太さ")
+            #expect(got.systemWeight == want.2, "\(role) の太さ (OS 側)")
+            #expect(got.customWeight == want.3, "\(role) の太さ (名前付き書体)")
         }
+    }
+
+    @Test("名前付き書体でも見出しは太いまま")
+    func customHeadlineKeepsWeight() {
+        // ⚠️ **`relativeTo:` は Dynamic Type の追随先を指すだけで、太さを継がない。**
+        // OS 側の `headline` は既定で太いが、名前付き書体は明示しないと細くなる。
+        let name = "HiraMaruProN-W4"
+        #expect(TypeRole.itemTitle.font(typeface: name)
+                == .custom(name, size: 17, relativeTo: .headline).weight(.semibold))
+        // 太さを指定しない役割は、その書体の既定のまま
+        #expect(TypeRole.body.font(typeface: name)
+                == .custom(name, size: 17, relativeTo: .body))
     }
 
     @Test("書体が無いときは OS のテキストスタイルをそのまま使う")
