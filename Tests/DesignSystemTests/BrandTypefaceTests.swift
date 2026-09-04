@@ -9,6 +9,13 @@ struct BrandTypefaceTests {
     @Test("書体を渡さないアプリの font は Typography の定義から変わらない")
     func systemFontMatchesTypography() {
         // ⚠️ ここがずれると、書体を指定していないアプリの見た目が黙って変わる。
+        //
+        // ⚠️ **この試験が落ちたら、直すのは実装であって期待値ではない。**
+        // 落ちる意味は「`Typography.swift` を変えたのに `TypeRole` を直していない」。
+        // 期待値だけを書き換えると、**書体を渡したアプリの経路だけが古い値のまま残る**
+        // (`TypeRole.metrics` は `Typography.swift` から自動では追随しない。
+        // 大きさも weight も `Font` の値からは読み出せないため)。
+        // 直す場所は `systemFont` と `metrics` の両方。
         #expect(TypeRole.screenTitle.systemFont == .screenTitle)
         #expect(TypeRole.sectionTitle.systemFont == .sectionTitle)
         #expect(TypeRole.itemTitle.systemFont == .itemTitle)

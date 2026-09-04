@@ -37,6 +37,11 @@ public enum TypeRole: CaseIterable, Sendable {
 
     /// 独自の書体を使うときの基準。`size` は各テキストスタイルの既定の大きさ、
     /// `textStyle` は Dynamic Type の追随先。
+    ///
+    /// ⚠️ **`Typography.swift` の定義と対になっている。片方だけを変えない。**
+    /// 大きさも weight も `Font` の値からは読み出せないため、ここが二重に持つ唯一の場所になる。
+    /// `Typography.swift` の役割を変えたら、ここも同じ意味へ直すこと。直さないと、
+    /// **書体を渡したアプリだけが古い大きさのまま**になる (渡さないアプリでは気付けない)。
     var metrics: (size: CGFloat, textStyle: Font.TextStyle, weight: Font.Weight) {
         switch self {
         case .screenTitle: return (34, .largeTitle, .bold)
