@@ -22,33 +22,31 @@ public enum TypeRole: CaseIterable, Sendable {
     /// ボタンの文字。
     case actionLabel
 
-    /// 書体を渡されなかったときの font。**`Typography.swift` の定義と同じものを返す。**
-    /// ここがずれると、書体を渡さないアプリの見た目が変わる。
+    /// 書体を渡されなかったときの font。**`metrics` から組み立てる。**
+    ///
+    /// ⚠️ **ここと `metrics` を別々に持たない。**別々に持つと、片方だけ変えたときに
+    /// 「書体を渡したアプリだけが古い大きさ」という、**渡さないアプリでは気付けない**
+    /// ずれ方をする。出どころを 1 つにすれば、そのずれ方自体が起きない。
     public var systemFont: Font {
-        switch self {
-        case .screenTitle: return .screenTitle
-        case .sectionTitle: return .sectionTitle
-        case .itemTitle: return .itemTitle
-        case .body: return .body
-        case .caption: return .caption
-        case .actionLabel: return .actionLabel
-        }
+        let m = metrics
+        let base = Font.system(m.textStyle)
+        return m.weight.map { base.weight($0) } ?? base
     }
 
-    /// 独自の書体を使うときの基準。`size` は各テキストスタイルの既定の大きさ、
-    /// `textStyle` は Dynamic Type の追随先。
+    /// 役割の見え方。**`Typography.swift` の静的メンバも、名前付き書体の組み立ても、
+    /// 両方ここから導く。**役割の見え方を変えるときは、ここだけを変える。
     ///
-    /// ⚠️ **`Typography.swift` の定義と対になっている。片方だけを変えない。**
-    /// 大きさも weight も `Font` の値からは読み出せないため、ここが二重に持つ唯一の場所になる。
-    /// `Typography.swift` の役割を変えたら、ここも同じ意味へ直すこと。直さないと、
-    /// **書体を渡したアプリだけが古い大きさのまま**になる (渡さないアプリでは気付けない)。
-    var metrics: (size: CGFloat, textStyle: Font.TextStyle, weight: Font.Weight) {
+    /// - `size`: そのテキストスタイルの既定の大きさ。名前付き書体を組むときの基準
+    /// - `textStyle`: Dynamic Type の追随先
+    /// - `weight`: 太さ。`nil` はテキストスタイルの既定のまま
+    ///   (`headline` は既定で太いので、重ねて指定すると別の値になる)
+    var metrics: (size: CGFloat, textStyle: Font.TextStyle, weight: Font.Weight?) {
         switch self {
         case .screenTitle: return (34, .largeTitle, .bold)
         case .sectionTitle: return (20, .title3, .semibold)
-        case .itemTitle: return (17, .headline, .semibold)
-        case .body: return (17, .body, .regular)
-        case .caption: return (13, .footnote, .regular)
+        case .itemTitle: return (17, .headline, nil)
+        case .body: return (17, .body, nil)
+        case .caption: return (13, .footnote, nil)
         case .actionLabel: return (17, .body, .semibold)
         }
     }
@@ -60,7 +58,8 @@ public enum TypeRole: CaseIterable, Sendable {
     public func font(typeface: String?) -> Font {
         guard let typeface, !typeface.isEmpty else { return systemFont }
         let m = metrics
-        return .custom(typeface, size: m.size, relativeTo: m.textStyle).weight(m.weight)
+        let font = Font.custom(typeface, size: m.size, relativeTo: m.textStyle)
+        return m.weight.map { font.weight($0) } ?? font
     }
 }
 

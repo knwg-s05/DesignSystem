@@ -6,24 +6,53 @@ import Testing
 @Suite("書体の受け取り口")
 struct BrandTypefaceTests {
 
-    @Test("書体を渡さないアプリの font は Typography の定義から変わらない")
-    func systemFontMatchesTypography() {
-        // ⚠️ ここがずれると、書体を指定していないアプリの見た目が黙って変わる。
-        //
-        // ⚠️ **この試験が落ちたら、直すのは実装であって期待値ではない。**
-        // 落ちる意味は「`Typography.swift` を変えたのに `TypeRole` を直していない」。
-        // 期待値だけを書き換えると、**書体を渡したアプリの経路だけが古い値のまま残る**
-        // (`TypeRole.metrics` は `Typography.swift` から自動では追随しない。
-        // 大きさも weight も `Font` の値からは読み出せないため)。
-        // 直す場所は `systemFont` と `metrics` の両方。
-        #expect(TypeRole.screenTitle.systemFont == .screenTitle)
-        #expect(TypeRole.sectionTitle.systemFont == .sectionTitle)
-        #expect(TypeRole.itemTitle.systemFont == .itemTitle)
-        // ⚠️ `.body` / `.caption` は SwiftUI 側の同名メンバと衝突して書けないため、
-        // 定義そのもの (Typography.swift) と同じ値を書いて突き合わせる。
+    @Test("公開している font の値が変わっていない")
+    func publicFontsKeepTheirValues() {
+        // ⚠️ **静的メンバどうしを突き合わせない。**`TypeRole.screenTitle.systemFont == .screenTitle`
+        // のように書くと、両辺が同じ出どころを見るため**何を変えても落ちない試験**になる。
+        // ここは OS のテキストスタイルから組んだ値を直接書き、見え方が変わったら落ちるようにする。
+        #expect(Font.screenTitle == .system(.largeTitle).weight(.bold))
+        #expect(Font.sectionTitle == .system(.title3).weight(.semibold))
+        #expect(Font.itemTitle == .system(.headline))
+        // ⚠️ `.body` / `.caption` は SwiftUI 側の同名メンバと衝突して `Font.body` と書けないため、
+        // 役割から引く (右辺が実体なので、値が動けば落ちることは変わらない)
         #expect(TypeRole.body.systemFont == .system(.body))
-        #expect(TypeRole.caption.systemFont == .footnote)
-        #expect(TypeRole.actionLabel.systemFont == .actionLabel)
+        #expect(TypeRole.caption.systemFont == .system(.footnote))
+        #expect(Font.actionLabel == .system(.body).weight(.semibold))
+
+        // 公開している名前と役割の対応 (どちらも同じ出どころなので、対応の確認にしかならない)
+        for role in TypeRole.allCases {
+            #expect(role.systemFont == role.font(typeface: nil))
+        }
+    }
+
+    @Test("名前付き書体の基準は役割ごとに決まっている")
+    func metricsAreFixed() {
+        // 名前付き書体は `metrics` から組む。**値が動いたら落ちるように直接書く。**
+        // ⚠️ `weight` の `nil` は「テキストスタイルの既定のまま」。`headline` は既定で太いため、
+        // `.semibold` を重ねると別の値になる (`公開している font の値が変わっていない` が捕まえる)。
+        let expected: [TypeRole: (CGFloat, Font.TextStyle, Font.Weight?)] = [
+            .screenTitle: (34, .largeTitle, .bold),
+            .sectionTitle: (20, .title3, .semibold),
+            .itemTitle: (17, .headline, nil),
+            .body: (17, .body, nil),
+            .caption: (13, .footnote, nil),
+            .actionLabel: (17, .body, .semibold),
+        ]
+
+        // 役割を足したら、ここへも足す
+        #expect(expected.count == TypeRole.allCases.count)
+
+        for role in TypeRole.allCases {
+            guard let want = expected[role] else {
+                Issue.record("\(role) の基準が試験に書かれていない")
+                continue
+            }
+            let got = role.metrics
+            #expect(got.size == want.0, "\(role) の大きさ")
+            #expect(got.textStyle == want.1, "\(role) の追随先")
+            #expect(got.weight == want.2, "\(role) の太さ")
+        }
     }
 
     @Test("書体が無いときは OS のテキストスタイルをそのまま使う")
