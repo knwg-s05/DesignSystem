@@ -2,16 +2,16 @@
 import PackageDescription
 
 // DesignSystem は表示の語彙(余白・角丸・書体・色・スタイル)だけを持つ層。
-// ParkApp / BalloonPop / AnimalGarden から参照する。
+// 複数のアプリから参照する。**アプリの名前をここへ書かない**(公開リポジトリのため)。
 //
 // ここにアプリ固有の概念を入れない。判断基準は「型名にドメインの語が入るかどうか」で、
-// PrimaryButtonStyle は入れてよく、BalloonCard や AnimalCard は入れない。
+// PrimaryButtonStyle は入れてよく、題材の語が入る 〜Card は入れない。
 // 入れると 2 本目のアプリが 1 本目の語彙を引きずり、共有する利点が消える。
 let package = Package(
     name: "DesignSystem",
     platforms: [
         // 参照するアプリのうち最も低い下限に合わせる。対応 OS はアプリ側の要件であり、
-        // 共有パッケージの都合で動かさない。現在の下限は AnimalGarden の iOS 18。
+        // 共有パッケージの都合で動かさない。現在の下限は参照するアプリに合わせた iOS 18。
         //
         // このパッケージのコードは iOS 26 を必要としない。ボタンとカードは ButtonStyle と
         // ViewModifier で見た目を自前で描いており、iOS 26 で刷新された標準コントロールの

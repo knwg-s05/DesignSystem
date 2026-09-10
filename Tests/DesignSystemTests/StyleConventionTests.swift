@@ -16,7 +16,7 @@ struct StyleConventionTests {
         #expect(source.contains("tint: Color = .brandAccent") == false)
     }
 
-    @Test("hudPanelの枠線はAnimalGarden側で使っていた強さを保つ")
+    @Test("hudPanelの枠線は移設前に使っていた強さを保つ")
     func hudPanelKeepsReadableBorder() throws {
         let source = try Self.source(named: "PanelModifiers.swift")
 
