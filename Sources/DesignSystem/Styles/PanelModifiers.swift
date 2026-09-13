@@ -64,7 +64,7 @@ public struct StatusBadgeModifier: ViewModifier {
         let resolvedTint = tint ?? brandTint
 
         content
-            .font(.caption)
+            .brandFont(.caption)
             .foregroundStyle(.contentPrimary)
             .padding(.vertical, Spacing.xxs)
             .padding(.horizontal, Spacing.xs)

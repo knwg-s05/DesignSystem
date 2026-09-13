@@ -16,7 +16,7 @@ import SwiftUI
 /// ## 色を固定しない
 ///
 /// 主色は `Color.brandAccent` を直接使わず、環境から引いている。アプリ側が
-/// `.brandTint(Color.parkGreen)` と書けばその配下すべてへ伝わる。
+/// `.brandTint(...)` にアプリの色を渡せば、その配下すべてへ伝わる。
 ///
 /// ## 文字色を白で固定しない
 ///
@@ -41,7 +41,7 @@ public struct PrimaryButtonStyle: ButtonStyle {
 
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.actionLabel)
+            .brandFont(.actionLabel)
             .foregroundStyle(brandTint.contrastingLabel(in: environment))
             .frame(maxWidth: .infinity)
             .padding(.vertical, Spacing.sm)
@@ -66,7 +66,7 @@ public struct SecondaryButtonStyle: ButtonStyle {
 
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.actionLabel)
+            .brandFont(.actionLabel)
             .foregroundStyle(.contentPrimary)
             .frame(maxWidth: .infinity)
             .padding(.vertical, Spacing.sm)
